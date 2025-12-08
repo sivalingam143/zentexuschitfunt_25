@@ -32,8 +32,6 @@ const Home = () => {
       const data = await response.json();
 
       if (data.head.code === 200 && data.body.schemes) {
-        // ⬅️ FIX: Set the state with the raw API data.
-        // The transformation logic for FundPlanCard is moved below the useEffect.
         setPlans(data.body.schemes);
       } else {
         console.error("Failed to fetch schemes:", data.head.msg);
@@ -58,14 +56,12 @@ const Home = () => {
     fetchSchemes(); 
   }, []);
 
-  // Prepare the separate formatted array for the FundPlanCards
+
   const cardPlans = plans.map((scheme) => ({
     image: img1,
-    amount: parseFloat(scheme.schemet_due_amount).toFixed(0), // Use for the main amount displayed on the card
+    amount: parseFloat(scheme.schemet_due_amount).toFixed(0), 
     title: scheme.scheme_name, 
-    // Re-use the monthsText logic for the card detail line
     monthsText: `${scheme.duration_unit === 'month' ? '₹' + scheme.schemet_due_amount + ' X ' + scheme.duration + ' MONTHS' : '₹' + scheme.schemet_due_amount + ' X ' + scheme.duration + ' Weeks'}`,
-    // Re-use the bonusText logic for the card detail line
     bonusText: `₹${(parseFloat(scheme.schemet_due_amount) * scheme.duration).toFixed(2)} + ₹${parseFloat(scheme.scheme_bonus).toFixed(2)}`,
     totalText: parseFloat(scheme.scheme_maturtiy_amount).toFixed(0), 
   }));
@@ -167,7 +163,6 @@ const Home = () => {
                    {loading ? (
                       <div className="text-center">Loading Plans...</div>
                     ) : plans.length > 0 ? (
-                      // ⬅️ Passing the raw API data (plans)
                       <FundTable data={plans} />
                     ) : (
                       <div className="text-center">No plans available.</div>
@@ -277,7 +272,7 @@ const Home = () => {
               ) : cardPlans.length > 0 ? (
                 // ⬅️ Now using the dynamically created cardPlans
                 cardPlans.map((plan, index) => (
-                  <Col lg={4} md={6} xs={12} key={index}>
+                  <Col lg={3} md={6} xs={12} key={index}>
                     <div data-aos="zoom-in" data-aos-delay={index * 150}>
                       <FundPlanCard {...plan} />
                     </div>
@@ -353,9 +348,13 @@ const Home = () => {
                   exclusive offers
                 </p>
                 <Button
+                  as="a"
+                  href="/HemnathCrackers.apk"
+                  download="HemnathCrackers.apk"
                   variant="warning"
                   size="lg"
                   className="px-5 py-3 fw-bold rounded-pill shadow-lg fs-5 cta-btn"
+                  target="_blank"
                 >
                   <i className="fas fa-download me-2"></i>Download APK Now
                 </Button>

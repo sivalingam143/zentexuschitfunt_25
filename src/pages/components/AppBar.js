@@ -26,15 +26,20 @@ const AppBar = () => {
           </Col>
 
           {/* CTA Button */}
-          <Col
+        <Col
             xs={12}
             sm={4}
             lg={3}
             className="d-flex justify-content-center justify-content-lg-end mb-2 mb-lg-0"
           >
-            <button className="btn btn-cta blink-btn text-white">
+            <a
+              href="/HemnathCrackers.apk"
+              download="HemnathCrackers.apk"
+              className="btn btn-cta blink-btn text-white"
+              target="_blank"
+            >
               Download APK <i className="fas fa-arrow-right ms-2"></i>
-            </button>
+            </a>
           </Col>
         </Row>
       </Container>
