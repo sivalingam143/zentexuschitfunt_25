@@ -8,7 +8,6 @@ import CartImg from "../../assets/cart.png";
 import Download from "../../assets/download.png";
 import register from "../../assets/register.jpg";
 
-// ... rest of the file ...
 
 export const testimonials = [
   {
