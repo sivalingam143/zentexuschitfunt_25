@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react"; 
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { Container, Row, Col, Card, Button, Carousel } from "react-bootstrap";
@@ -11,8 +11,42 @@ import HowItWorks from "./components/HowItWorks";
 import img1 from "../assets/diwali-chit-fund-banner-D2a1cjBH (1).jpeg";
 import img2 from "../assets/money_img.jpg";
 import { fundPlans, testimonials, steps } from "./components/Data";
+import API_DOMAIN from "../config/config"; 
 
 const Home = () => {
+ 
+  const [plans, setPlans] = useState([]); // Raw scheme data
+  const [loading, setLoading] = useState(true);
+
+  const fetchSchemes = async () => {
+    try {
+      const response = await fetch(API_DOMAIN + "/scheme_api.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "list", 
+        }),
+      });
+      const data = await response.json();
+
+      if (data.head.code === 200 && data.body.schemes) {
+        // ⬅️ FIX: Set the state with the raw API data.
+        // The transformation logic for FundPlanCard is moved below the useEffect.
+        setPlans(data.body.schemes);
+      } else {
+        console.error("Failed to fetch schemes:", data.head.msg);
+        setPlans([]);
+      }
+    } catch (error) {
+      console.error("Error fetching schemes:", error);
+      setPlans([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     AOS.init({
       offset: 100,
@@ -21,7 +55,20 @@ const Home = () => {
       easing: "ease-out-cubic",
       once: true,
     });
+    fetchSchemes(); 
   }, []);
+
+  // Prepare the separate formatted array for the FundPlanCards
+  const cardPlans = plans.map((scheme) => ({
+    image: img1,
+    amount: parseFloat(scheme.schemet_due_amount).toFixed(0), // Use for the main amount displayed on the card
+    title: scheme.scheme_name, 
+    // Re-use the monthsText logic for the card detail line
+    monthsText: `${scheme.duration_unit === 'month' ? '₹' + scheme.schemet_due_amount + ' X ' + scheme.duration + ' MONTHS' : '₹' + scheme.schemet_due_amount + ' X ' + scheme.duration + ' Weeks'}`,
+    // Re-use the bonusText logic for the card detail line
+    bonusText: `₹${(parseFloat(scheme.schemet_due_amount) * scheme.duration).toFixed(2)} + ₹${parseFloat(scheme.scheme_bonus).toFixed(2)}`,
+    totalText: parseFloat(scheme.scheme_maturtiy_amount).toFixed(0), 
+  }));
 
   return (
     <>
@@ -117,7 +164,14 @@ const Home = () => {
                     <Card.Title className="h3 fw-bold text-gold mb-4 text-center fund-table-title">
                       Plan Summary
                     </Card.Title>
-                    <FundTable data={fundPlans} />
+                   {loading ? (
+                      <div className="text-center">Loading Plans...</div>
+                    ) : plans.length > 0 ? (
+                      // ⬅️ Passing the raw API data (plans)
+                      <FundTable data={plans} />
+                    ) : (
+                      <div className="text-center">No plans available.</div>
+                    )}
                   </Card.Body>
                 </Card>
               </Col>
@@ -216,54 +270,24 @@ const Home = () => {
               </Col>
             </Row>
             <Row className="justify-content-center g-4">
-              {[
-                {
-                  image: img1,
-                  amount: "100",
-                  title: "வார திட்டம்",
-                  monthsText: "₹100 X 45 Weeks",
-                  bonusText: "₹4500 + ₹500",
-                  totalText: "5000",
-                },
-                {
-                  image: img1,
-                  amount: "300",
-                  title: "மாத திட்டம்",
-                  monthsText: "₹300 X 9 MONTHS",
-                  bonusText: "₹2700 + ₹300",
-                  totalText: "3000",
-                },
-                {
-                  image: img1,
-                  amount: "500",
-                  title: "மாத திட்டம்",
-                  monthsText: "₹500 X 9 MONTHS",
-                  bonusText: "₹4500 + ₹500",
-                  totalText: "5000",
-                },
-                {
-                  image: img1,
-                  amount: "1000",
-                  title: "மாத திட்டம்",
-                  monthsText: "₹1000 X 9 MONTHS",
-                  bonusText: "₹9000 + ₹1000",
-                  totalText: "10000",
-                },
-                {
-                  image: img1,
-                  amount: "2000",
-                  title: "மாத திட்டம்",
-                  monthsText: "₹2000 X 9 MONTHS",
-                  bonusText: "₹18000 + ₹2000",
-                  totalText: "20000",
-                },
-              ].map((plan, index) => (
-                <Col lg={4} md={6} xs={12} key={index}>
-                  <div data-aos="zoom-in" data-aos-delay={index * 150}>
-                    <FundPlanCard {...plan} />
-                  </div>
+              {loading ? (
+                <Col lg={12} className="text-center">
+                  Loading Plans...
                 </Col>
-              ))}
+              ) : cardPlans.length > 0 ? (
+                // ⬅️ Now using the dynamically created cardPlans
+                cardPlans.map((plan, index) => (
+                  <Col lg={4} md={6} xs={12} key={index}>
+                    <div data-aos="zoom-in" data-aos-delay={index * 150}>
+                      <FundPlanCard {...plan} />
+                    </div>
+                  </Col>
+                ))
+              ) : (
+                <Col lg={12} className="text-center">
+                  No plans available to display.
+                </Col>
+              )}
             </Row>
           </Container>
         </section>
