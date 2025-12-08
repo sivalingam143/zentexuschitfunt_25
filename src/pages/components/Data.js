@@ -1,10 +1,14 @@
-export const fundPlans = [
-  { plan: "₹100 X 45 WEEKS", total: "₹4500 + ₹500", amount: "5000" },
-  { plan: "₹300 X 9 MONTHS", total: "₹2700 + ₹300", amount: "3000" },
-  { plan: "₹500 X 9 MONTHS", total: "₹4500 + ₹500", amount: "5000" },
-  { plan: "₹1000 X 9 MONTHS", total: "₹9000 + ₹1000", amount: "10000" },
-  { plan: "₹2000 X 9 MONTHS", total: "₹18000 + ₹2000", amount: "20000" },
-];
+import React from "react";
+import AnalysisImg from "../../assets/analysis.png"; 
+import RecordImg from "../../assets/record.png";   // For Step 2: First-Time Signup
+import KeyImg from "../../assets/key.png";         // For Step 3: Choose & Activate Plan
+import CardImg from "../../assets/card.png";       // For Step 4: Make Your First Payment
+import PurseImg from "../../assets/purse.png";     // For Step 5: Track and Manage
+import CartImg from "../../assets/cart.png";   
+import Download from "../../assets/download.png";
+import register from "../../assets/register.jpg";
+
+// ... rest of the file ...
 
 export const testimonials = [
   {
@@ -25,67 +29,61 @@ export const testimonials = [
 export const steps = [
   {
     stepNumber: 1,
-    heading: "Choose your plan from our plan list",
+    heading: "View Plans & Download App",
     description:
-      "You can choose between plans and you can purchase any number of plans you like. This makes you choose the amount of fund you need for your Diwali plan",
-    imageSrc:
-      "https://asset.iamretailer.com/resto/catalog/view/theme/goodwill/images/plans/analysis.png",
-    imageAlt: "choose",
+      "Customer can see all available plans, due amounts, and bonus amounts directly on this page. To proceed, click the 'Download APK Now' button to install our mobile application.",
+    imageSrc: Download,
+    imageAlt: "download_app",
     imageClass: "howchoose",
     position: "right",
   },
   {
     stepNumber: 2,
-    heading: "Submit us the Register form",
+    heading: "First-Time Signup",
     description:
-      "Submit your information with the registration form presents in this page. Kindly fill the validation communication details to contact you at right time with the information.",
-    imageSrc:
-      "https://asset.iamretailer.com/resto/catalog/view/theme/goodwill/images/plans/record.png",
-    imageAlt: "register",
+      "New users must complete a one-time signup process. Provide basic information like your name, mobile number, and address to create your secure account.",
+    imageSrc: register, 
+    imageAlt: "signup",
     imageClass: "howsubmit",
     position: "left",
   },
   {
     stepNumber: 3,
-    heading: "Pay with the link/ UPI, Bank transfer or the Account generated",
+    heading: "Choose & Activate Your Plan",
     description:
-      "Once the form submitted we will create a separate account for you and you will be received Mail and SMS for your account. you can deposit your every month amount into that. Or you can pay via any of the payment options available in the terms and conditons",
-    imageSrc:
-      "https://asset.iamretailer.com/resto/catalog/view/theme/goodwill/images/plans/card.png",
-    imageAlt: "account",
-    imageClass: "howpay",
-    position: "right",
-  },
-  {
-    stepNumber: 4,
-    heading: "Amount credit to Goodwill Fireworks Crackers wallet",
-    description:
-      "At the end of scheme the amount will be credited into goodwillfireworks.com wallet with the bonus amount and you will be notified via Email and SMS",
-    imageSrc:
-      "https://asset.iamretailer.com/resto/catalog/view/theme/goodwill/images/plans/purse.png",
-    imageAlt: "credit",
-    imageClass: "howamount",
-    position: "left",
-  },
-  {
-    stepNumber: 5,
-    heading: "Login with your mobile number at goodwillfireworks.in",
-    description:
-      "Login with your registered mobile number or email with our site and you can able to view the amount credited into wallet with bonus amount",
-    imageSrc:
-      "https://asset.iamretailer.com/resto/catalog/view/theme/goodwill/images/plans/key.png",
-    imageAlt: "login",
+      "Once signed up and logged in, you can select the desired fund plan directly within the app.",
+    imageSrc: KeyImg, 
+    imageAlt: "choose_plan",
     imageClass: "howlogin",
     position: "right",
   },
   {
-    stepNumber: 6,
-    heading: "Enjoy the crackers purchase",
+    stepNumber: 4,
+    heading: "Make Your First Payment",
     description:
-      "You can choose your desired products and can purchase with the wallet amount you have in your wallet and Enjoy the celebration!",
-    imageSrc:
-      "https://asset.iamretailer.com/resto/catalog/view/theme/goodwill/images/plans/cart.png",
-    imageAlt: "purchase",
+      "You can choose to pay the due amount using UPI, Bank Transfer, or any other convenient payment option available inside the application to start your scheme.",
+    imageSrc: CardImg, // ⬅️ Changed to local variable
+    imageAlt: "payment",
+    imageClass: "howpay",
+    position: "left",
+  },
+  {
+    stepNumber: 5,
+    heading: "Track and Manage",
+    description:
+      "Track your monthly payments, view your accumulated bonus, and manage your plan status seamlessly through the app dashboard.",
+    imageSrc: PurseImg, // ⬅️ Changed to local variable
+    imageAlt: "track_wallet",
+    imageClass: "howamount",
+    position: "right",
+  },
+  {
+    stepNumber: 6,
+    heading: "Enjoy Your Diwali Crackers!",
+    description:
+      "At the end of the scheme, use your accumulated funds and bonus to purchase your favorite crackers for a joyous Diwali celebration!",
+    imageSrc: CartImg, // ⬅️ Changed to local variable
+    imageAlt: "purchase_crackers",
     imageClass: "howenjoy",
     position: "left",
   },

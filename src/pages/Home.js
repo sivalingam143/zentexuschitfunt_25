@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"; 
+import React, { useEffect, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { Container, Row, Col, Card, Button, Carousel } from "react-bootstrap";
@@ -11,11 +11,12 @@ import HowItWorks from "./components/HowItWorks";
 import img1 from "../assets/diwali-chit-fund-banner-D2a1cjBH (1).jpeg";
 import img2 from "../assets/money_img.jpg";
 import { fundPlans, testimonials, steps } from "./components/Data";
-import API_DOMAIN from "../config/config"; 
+import API_DOMAIN from "../config/config";
 
 const Home = () => {
- 
-  const [plans, setPlans] = useState([]); // Raw scheme data
+  const [feedback, setFeedback] = useState([]);
+  const [feedbackLoading, setFeedbackLoading] = useState(true);
+  const [plans, setPlans] = useState([]); 
   const [loading, setLoading] = useState(true);
 
   const fetchSchemes = async () => {
@@ -26,7 +27,7 @@ const Home = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          action: "list", 
+          action: "list",
         }),
       });
       const data = await response.json();
@@ -44,6 +45,38 @@ const Home = () => {
       setLoading(false);
     }
   };
+ 
+
+  const fetchFeedback = async () => {
+    try {
+      const response = await fetch(API_DOMAIN + "/feedback.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+         search_text: "",
+        }),
+      });
+      const data = await response.json();
+
+      if (data.head.msg === "Success" && data.body.feedback) {
+        const formattedFeedback = data.body.feedback.map((item) => ({
+          quote: item.customer_feedback_message,
+          name: item.customer_name , 
+        }));
+        setFeedback(formattedFeedback);
+      } else {
+        console.error("Failed to fetch feedback:", data.head.msg);
+        setFeedback(testimonials);
+      }
+    } catch (error) {
+      console.error("Error fetching feedback:", error);
+      setFeedback(testimonials);
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
 
   useEffect(() => {
     AOS.init({
@@ -53,17 +86,23 @@ const Home = () => {
       easing: "ease-out-cubic",
       once: true,
     });
-    fetchSchemes(); 
+    fetchSchemes();
+    fetchFeedback();
   }, []);
-
 
   const cardPlans = plans.map((scheme) => ({
     image: img1,
-    amount: parseFloat(scheme.schemet_due_amount).toFixed(0), 
-    title: scheme.scheme_name, 
-    monthsText: `${scheme.duration_unit === 'month' ? '₹' + scheme.schemet_due_amount + ' X ' + scheme.duration + ' MONTHS' : '₹' + scheme.schemet_due_amount + ' X ' + scheme.duration + ' Weeks'}`,
-    bonusText: `₹${(parseFloat(scheme.schemet_due_amount) * scheme.duration).toFixed(2)} + ₹${parseFloat(scheme.scheme_bonus).toFixed(2)}`,
-    totalText: parseFloat(scheme.scheme_maturtiy_amount).toFixed(0), 
+    amount: parseFloat(scheme.schemet_due_amount).toFixed(0),
+    title: scheme.scheme_name,
+    monthsText: `${
+      scheme.duration_unit === "month"
+        ? "₹" + scheme.schemet_due_amount + " X " + scheme.duration + " MONTHS"
+        : "₹" + scheme.schemet_due_amount + " X " + scheme.duration + " Weeks"
+    }`,
+    bonusText: `₹${(
+      parseFloat(scheme.schemet_due_amount) * scheme.duration
+    ).toFixed(2)} + ₹${parseFloat(scheme.scheme_bonus).toFixed(2)}`,
+    totalText: parseFloat(scheme.scheme_maturtiy_amount).toFixed(0),
   }));
 
   return (
@@ -160,7 +199,7 @@ const Home = () => {
                     <Card.Title className="h3 fw-bold text-gold mb-4 text-center fund-table-title">
                       Plan Summary
                     </Card.Title>
-                   {loading ? (
+                    {loading ? (
                       <div className="text-center">Loading Plans...</div>
                     ) : plans.length > 0 ? (
                       <FundTable data={plans} />
@@ -289,7 +328,6 @@ const Home = () => {
 
         {/* HowItWorks - ID for smooth scroll */}
         <HowItWorks title="How this works" steps={steps} />
-        {/* Testimonials Section - Updated to Carousel */}
         <section className="testimonials-section py-5 bg-gradient-tertiary">
           <Container>
             <Row className="justify-content-center mb-5">
@@ -307,29 +345,36 @@ const Home = () => {
             </Row>
             <Row className="justify-content-center">
               <Col lg={8}>
-                <Carousel
-                  interval={3000}
-                  indicators={false}
-                  controls={true}
-                  className="testimonials-carousel"
-                  data-aos="fade-up"
-                >
-                  {testimonials.map((testimonial, index) => (
-                    <Carousel.Item key={index}>
-                      <Card className="border-0 shadow-xl bg-white mx-3">
-                        <Card.Body className="p-5 text-center">
-                          <i className="fas fa-quote-left text-gold fs-1 mb-3"></i>
-                          <p className="lead mb-4 text-dark opacity-90 fs-5">
-                            "{testimonial.quote}"
-                          </p>
-                          <h6 className="fw-bold text-gold">
-                            {testimonial.name}
-                          </h6>
-                        </Card.Body>
-                      </Card>
-                    </Carousel.Item>
-                  ))}
-                </Carousel>
+                {feedbackLoading ? (
+                  <div className="text-center">
+                    Loading Customer Feedback...
+                  </div>
+                ) : (
+                  <Carousel
+                    interval={3000}
+                    indicators={false}
+                    controls={true}
+                    className="testimonials-carousel"
+                    data-aos="fade-up"
+                  >
+                    {/* ⬅️ Use the state variable 'feedback' */}
+                    {feedback.map((testimonial, index) => (
+                      <Carousel.Item key={index}>
+                        <Card className="border-0 shadow-xl bg-white mx-3">
+                          <Card.Body className="p-5 text-center">
+                            <i className="fas fa-quote-left text-gold fs-1 mb-3"></i>
+                            <p className="lead mb-4 text-dark opacity-90 fs-5">
+                              "{testimonial.quote}"
+                            </p>
+                            <h6 className="fw-bold text-gold">
+                              {testimonial.name}
+                            </h6>
+                          </Card.Body>
+                        </Card>
+                      </Carousel.Item>
+                    ))}
+                  </Carousel>
+                )}
               </Col>
             </Row>
           </Container>
