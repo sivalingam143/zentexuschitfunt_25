@@ -16,7 +16,7 @@ import API_DOMAIN from "../config/config";
 const Home = () => {
   const [feedback, setFeedback] = useState([]);
   const [feedbackLoading, setFeedbackLoading] = useState(true);
-  const [plans, setPlans] = useState([]); 
+  const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchSchemes = async () => {
@@ -45,7 +45,6 @@ const Home = () => {
       setLoading(false);
     }
   };
- 
 
   const fetchFeedback = async () => {
     try {
@@ -55,7 +54,7 @@ const Home = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-         search_text: "",
+          search_text: "",
         }),
       });
       const data = await response.json();
@@ -63,7 +62,8 @@ const Home = () => {
       if (data.head.msg === "Success" && data.body.feedback) {
         const formattedFeedback = data.body.feedback.map((item) => ({
           quote: item.customer_feedback_message,
-          name: item.customer_name , 
+          name: item.customer_name || "", // Set a default name if empty
+          rating: item.customer_feedback_rating, // ⬅️ Add the rating here
         }));
         setFeedback(formattedFeedback);
       } else {
@@ -105,6 +105,34 @@ const Home = () => {
     totalText: parseFloat(scheme.scheme_maturtiy_amount).toFixed(0),
   }));
 
+  // Inside the Home component, before the 'return' statement:
+
+  // Helper function to render star rating
+  const renderStars = (rating) => {
+    const totalStars = 5;
+    const filledStars = parseInt(rating) || 0; // Ensure it's an integer, default to 0
+    const stars = [];
+
+    // Render filled stars
+    for (let i = 0; i < filledStars; i++) {
+      stars.push(
+        <i key={`filled-${i}`} className="fas fa-star text-warning me-1"></i>
+      );
+    }
+
+    // Render empty stars
+    for (let i = 0; i < totalStars - filledStars; i++) {
+      stars.push(
+        <i
+          key={`empty-${i}`}
+          className="far fa-star text-secondary me-1"
+          style={{ opacity: 0.5 }}
+        ></i>
+      ); // Use 'far' for outlined star
+    }
+
+    return <div className="d-flex justify-content-center mb-3">{stars}</div>;
+  };
   return (
     <>
       <AppBar />
@@ -363,6 +391,8 @@ const Home = () => {
                         <Card className="border-0 shadow-xl bg-white mx-3">
                           <Card.Body className="p-5 text-center">
                             <i className="fas fa-quote-left text-gold fs-1 mb-3"></i>
+                            {/* ⬅️ Insert the Star Rating here */}
+                            {renderStars(testimonial.rating)}
                             <p className="lead mb-4 text-dark opacity-90 fs-5">
                               "{testimonial.quote}"
                             </p>
