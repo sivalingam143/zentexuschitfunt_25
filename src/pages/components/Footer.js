@@ -66,10 +66,10 @@ const Footer = () => {
           <Col lg={3} md={6} className="mt-3 mt-lg-0">
             <h6 className="fw-bold text-gold mb-3">Contact</h6>
             <p className="mb-1 footer-text">
-              <i className="fas fa-phone me-2"></i>+91-XXXXXXXXX
+              <i className="fas fa-phone me-2"></i>+91-9363762876
             </p>
             <p className="mb-1 footer-text">
-              <i className="fas fa-envelope me-2"></i>info@hemnathcrackers.com
+              <i className="fas fa-envelope me-2"></i>support@zentexus.com
             </p>
             <p className="footer-text">
               <i className="fas fa-map-marker-alt me-2"></i>Tamilnadu, India
