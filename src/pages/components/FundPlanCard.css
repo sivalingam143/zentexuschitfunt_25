@@ -70,8 +70,8 @@
 }
 
 .small-circle {
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   background: linear-gradient(
     135deg,
     rgba(52, 152, 219, 0.3),
@@ -84,13 +84,14 @@
   justify-content: center;
   border: 2px solid rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(5px);
+  /* white-space: inherit; */
 }
 
 .small-circle h2 {
   margin: 0 0 5px 0;
   font-size: 24px;
   font-weight: bold;
-  color: #3498db;
+  color: #34aeff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 

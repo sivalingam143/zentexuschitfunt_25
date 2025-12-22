@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { Container, Row, Col, Card, Button, Carousel } from "react-bootstrap";
@@ -11,8 +11,73 @@ import HowItWorks from "./components/HowItWorks";
 import img1 from "../assets/diwali-chit-fund-banner-D2a1cjBH (1).jpeg";
 import img2 from "../assets/money_img.jpg";
 import { fundPlans, testimonials, steps } from "./components/Data";
+import API_DOMAIN from "../config/config";
 
 const Home = () => {
+  const [feedback, setFeedback] = useState([]);
+  const [feedbackLoading, setFeedbackLoading] = useState(true);
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSchemes = async () => {
+    try {
+      const response = await fetch(API_DOMAIN + "/scheme_api.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "list",
+        }),
+      });
+      const data = await response.json();
+
+      if (data.head.code === 200 && data.body.schemes) {
+        setPlans(data.body.schemes);
+      } else {
+        console.error("Failed to fetch schemes:", data.head.msg);
+        setPlans([]);
+      }
+    } catch (error) {
+      console.error("Error fetching schemes:", error);
+      setPlans([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchFeedback = async () => {
+    try {
+      const response = await fetch(API_DOMAIN + "/feedback.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          search_text: "",
+        }),
+      });
+      const data = await response.json();
+
+      if (data.head.msg === "Success" && data.body.feedback) {
+        const formattedFeedback = data.body.feedback.map((item) => ({
+          quote: item.customer_feedback_message,
+          name: item.customer_name || "", // Set a default name if empty
+          rating: item.customer_feedback_rating, // ⬅️ Add the rating here
+        }));
+        setFeedback(formattedFeedback);
+      } else {
+        console.error("Failed to fetch feedback:", data.head.msg);
+        setFeedback(testimonials);
+      }
+    } catch (error) {
+      console.error("Error fetching feedback:", error);
+      setFeedback(testimonials);
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+
   useEffect(() => {
     AOS.init({
       offset: 100,
@@ -21,8 +86,53 @@ const Home = () => {
       easing: "ease-out-cubic",
       once: true,
     });
+    fetchSchemes();
+    fetchFeedback();
   }, []);
 
+  const cardPlans = plans.map((scheme) => ({
+    image: img1,
+    amount: parseFloat(scheme.schemet_due_amount).toFixed(0),
+    title: scheme.scheme_name,
+    monthsText: `${
+      scheme.duration_unit === "month"
+        ? "₹" + scheme.schemet_due_amount + " X " + scheme.duration + " MONTHS"
+        : "₹" + scheme.schemet_due_amount + " X " + scheme.duration + " Weeks"
+    }`,
+    bonusText: `₹${(
+      parseFloat(scheme.schemet_due_amount) * scheme.duration
+    ).toFixed(2)} + ₹${parseFloat(scheme.scheme_bonus).toFixed(2)}`,
+    totalText: parseFloat(scheme.scheme_maturtiy_amount).toFixed(0),
+  }));
+
+  // Inside the Home component, before the 'return' statement:
+
+  // Helper function to render star rating
+  const renderStars = (rating) => {
+    const totalStars = 5;
+    const filledStars = parseInt(rating) || 0; // Ensure it's an integer, default to 0
+    const stars = [];
+
+    // Render filled stars
+    for (let i = 0; i < filledStars; i++) {
+      stars.push(
+        <i key={`filled-${i}`} className="fas fa-star text-warning me-1"></i>
+      );
+    }
+
+    // Render empty stars
+    for (let i = 0; i < totalStars - filledStars; i++) {
+      stars.push(
+        <i
+          key={`empty-${i}`}
+          className="far fa-star text-secondary me-1"
+          style={{ opacity: 0.5 }}
+        ></i>
+      ); // Use 'far' for outlined star
+    }
+
+    return <div className="d-flex justify-content-center mb-3">{stars}</div>;
+  };
   return (
     <>
       <AppBar />
@@ -117,7 +227,13 @@ const Home = () => {
                     <Card.Title className="h3 fw-bold text-gold mb-4 text-center fund-table-title">
                       Plan Summary
                     </Card.Title>
-                    <FundTable data={fundPlans} />
+                    {loading ? (
+                      <div className="text-center">Loading Plans...</div>
+                    ) : plans.length > 0 ? (
+                      <FundTable data={plans} />
+                    ) : (
+                      <div className="text-center">No plans available.</div>
+                    )}
                   </Card.Body>
                 </Card>
               </Col>
@@ -216,61 +332,30 @@ const Home = () => {
               </Col>
             </Row>
             <Row className="justify-content-center g-4">
-              {[
-                {
-                  image: img1,
-                  amount: "100",
-                  title: "வார திட்டம்",
-                  monthsText: "₹100 X 45 Weeks",
-                  bonusText: "₹4500 + ₹500",
-                  totalText: "5000",
-                },
-                {
-                  image: img1,
-                  amount: "300",
-                  title: "மாத திட்டம்",
-                  monthsText: "₹300 X 9 MONTHS",
-                  bonusText: "₹2700 + ₹300",
-                  totalText: "3000",
-                },
-                {
-                  image: img1,
-                  amount: "500",
-                  title: "மாத திட்டம்",
-                  monthsText: "₹500 X 9 MONTHS",
-                  bonusText: "₹4500 + ₹500",
-                  totalText: "5000",
-                },
-                {
-                  image: img1,
-                  amount: "1000",
-                  title: "மாத திட்டம்",
-                  monthsText: "₹1000 X 9 MONTHS",
-                  bonusText: "₹9000 + ₹1000",
-                  totalText: "10000",
-                },
-                {
-                  image: img1,
-                  amount: "2000",
-                  title: "மாத திட்டம்",
-                  monthsText: "₹2000 X 9 MONTHS",
-                  bonusText: "₹18000 + ₹2000",
-                  totalText: "20000",
-                },
-              ].map((plan, index) => (
-                <Col lg={4} md={6} xs={12} key={index}>
-                  <div data-aos="zoom-in" data-aos-delay={index * 150}>
-                    <FundPlanCard {...plan} />
-                  </div>
+              {loading ? (
+                <Col lg={12} className="text-center">
+                  Loading Plans...
                 </Col>
-              ))}
+              ) : cardPlans.length > 0 ? (
+                // ⬅️ Now using the dynamically created cardPlans
+                cardPlans.map((plan, index) => (
+                  <Col lg={3} md={6} xs={12} key={index}>
+                    <div data-aos="zoom-in" data-aos-delay={index * 150}>
+                      <FundPlanCard {...plan} />
+                    </div>
+                  </Col>
+                ))
+              ) : (
+                <Col lg={12} className="text-center">
+                  No plans available to display.
+                </Col>
+              )}
             </Row>
           </Container>
         </section>
 
         {/* HowItWorks - ID for smooth scroll */}
         <HowItWorks title="How this works" steps={steps} />
-        {/* Testimonials Section - Updated to Carousel */}
         <section className="testimonials-section py-5 bg-gradient-tertiary">
           <Container>
             <Row className="justify-content-center mb-5">
@@ -288,29 +373,38 @@ const Home = () => {
             </Row>
             <Row className="justify-content-center">
               <Col lg={8}>
-                <Carousel
-                  interval={3000}
-                  indicators={false}
-                  controls={true}
-                  className="testimonials-carousel"
-                  data-aos="fade-up"
-                >
-                  {testimonials.map((testimonial, index) => (
-                    <Carousel.Item key={index}>
-                      <Card className="border-0 shadow-xl bg-white mx-3">
-                        <Card.Body className="p-5 text-center">
-                          <i className="fas fa-quote-left text-gold fs-1 mb-3"></i>
-                          <p className="lead mb-4 text-dark opacity-90 fs-5">
-                            "{testimonial.quote}"
-                          </p>
-                          <h6 className="fw-bold text-gold">
-                            {testimonial.name}
-                          </h6>
-                        </Card.Body>
-                      </Card>
-                    </Carousel.Item>
-                  ))}
-                </Carousel>
+                {feedbackLoading ? (
+                  <div className="text-center">
+                    Loading Customer Feedback...
+                  </div>
+                ) : (
+                  <Carousel
+                    interval={3000}
+                    indicators={false}
+                    controls={true}
+                    className="testimonials-carousel"
+                    data-aos="fade-up"
+                  >
+                    {/* ⬅️ Use the state variable 'feedback' */}
+                    {feedback.map((testimonial, index) => (
+                      <Carousel.Item key={index}>
+                        <Card className="border-0 shadow-xl bg-white mx-3">
+                          <Card.Body className="p-5 text-center">
+                            <i className="fas fa-quote-left text-gold fs-1 mb-3"></i>
+                            {/* ⬅️ Insert the Star Rating here */}
+                            {renderStars(testimonial.rating)}
+                            <p className="lead mb-4 text-dark opacity-90 fs-5">
+                              "{testimonial.quote}"
+                            </p>
+                            <h6 className="fw-bold text-gold">
+                              {testimonial.name}
+                            </h6>
+                          </Card.Body>
+                        </Card>
+                      </Carousel.Item>
+                    ))}
+                  </Carousel>
+                )}
               </Col>
             </Row>
           </Container>
@@ -329,9 +423,13 @@ const Home = () => {
                   exclusive offers
                 </p>
                 <Button
+                  as="a"
+                  href="/HemnathCrackers.apk"
+                  download="HemnathCrackers.apk"
                   variant="warning"
                   size="lg"
                   className="px-5 py-3 fw-bold rounded-pill shadow-lg fs-5 cta-btn"
+                  target="_blank"
                 >
                   <i className="fas fa-download me-2"></i>Download APK Now
                 </Button>
